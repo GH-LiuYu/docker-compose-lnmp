@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+    nginx:
+        image: nginx:latest
+        container_name: nginx-server
+        restart: always
+        volumes:
+            - ./nginx/conf:/etc/nginx/conf.d #把容器的conf.d映射到 ./nginx/conf.d
+            - ../:/usr/share/laravel7
+            - ./nginx/log/:/var/log/nginx/
+        networks:
+            - lnmp
+        depends_on:
+            - php
+        ports:
+            - "8080:80"
+    php:
+        image: php:7.4-fpm-alpine
+        container_name: php-server
+        volumes:
+            - ../:/www
+        networks:
+            - lnmp
+        ports:
+            - "9000:9000"
+        depends_on:
+            - mysql
+    mysql:
+        image: mysql:latest
+        container_name: mysql-server
+        restart: always
+        environment:
+              MYSQL_ROOT_HOST: '%'
+              MYSQL_ROOT_PASSWORD: 123456
+              MYSQL_USER: test
+              MYSQL_PASSWORD: 111111
+        command:
+              --default-authentication-plugin=mysql_native_password
+              --character-set-server=utf8mb4
+              --collation-server=utf8mb4_0900_ai_ci
+              --explicit_defaults_for_timestamp=true
+              --lower_case_table_names=1
+        ports:
+          - 3306:3306
+        volumes:
+              - ./mysql/conf/my.cnf:/etc/my.cnf
+        networks:
+              - lnmp
+networks:
+    lnmp:
